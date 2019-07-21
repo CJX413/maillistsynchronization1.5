@@ -1,5 +1,6 @@
 package com.weixin.maillistsynchronization;
 
+import com.google.gson.JsonObject;
 import com.weixin.maillistsynchronization.Model.Department;
 import com.weixin.maillistsynchronization.mapper.DepartmentDao;
 import org.junit.Test;
@@ -15,7 +16,10 @@ public class MaillistsynchronizationApplicationTests {
     private DepartmentDao departmentDao;
     @Test
     public void contextLoads() {
-        System.out.println(departmentDao.queryAll());
+        JsonObject object = new JsonObject();
+        object.addProperty("name", "广州研发中心");
+        object.addProperty("parentid", "1");
+        System.out.println(object.toString());
     }
 
 }

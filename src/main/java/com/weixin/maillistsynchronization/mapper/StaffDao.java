@@ -62,7 +62,7 @@ public interface StaffDao {
             @Result(column = "email", property = "email", jdbcType = JdbcType.VARCHAR),
             @Result(column = "position", property = "position", jdbcType = JdbcType.VARCHAR)
     })
-    List<Staff> queryByUserId(@Param("userId") String userId);
+    List<Staff> queryByUserId(@Param("userid") String userId);
 
     /**
      * 按名字查询
@@ -131,7 +131,7 @@ public interface StaffDao {
             "delete from staff",
             "where userid = #{userid,jdbcType=VARCHAR}"
     })
-    int deleteByUserId(@Param("userId") String userId);
+    int deleteByUserId(@Param("userid") String userId);
 
     /**
      * 根据部门ID删除该部门的所有员工
