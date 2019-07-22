@@ -21,7 +21,7 @@ public class Tools {
         HashSet<Integer> hashSet = new HashSet<>();
         list.forEach(department -> hashSet.add(department.getId()));
         for (Department department:list) {
-            if (!hashSet.contains(department.getParentid())) {
+            if (!hashSet.contains(department.getParentid())&&department.getParentid()!=1) {
                 return false;
             }
         }

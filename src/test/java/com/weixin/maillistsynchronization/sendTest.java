@@ -4,6 +4,7 @@ import com.weixin.maillistsynchronization.Model.Department;
 import com.weixin.maillistsynchronization.Service.DepartmentService;
 import com.weixin.maillistsynchronization.Utils.Tools;
 import com.weixin.maillistsynchronization.mapper.DepartmentDao;
+import com.weixin.maillistsynchronization.mapper.StaffDao;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -21,7 +22,7 @@ import java.util.*;
 @WebAppConfiguration
 public class sendTest {
     @Autowired
-    private DepartmentService service;
+    private StaffDao staffDao;
     @Autowired
     private DepartmentDao departmentDao;
 
@@ -37,7 +38,7 @@ public class sendTest {
 
     @Test
     public void send() {
-
+        //System.out.println(Tools.checkStaffDate(staffDao.queryAll(),departmentDao.queryAll()));
     }
 
     //@Test

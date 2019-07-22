@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -65,6 +64,67 @@ public class DataController {
         }else {
             return json.toString();
         }
+    }
+
+    /**
+     * 更新部门
+     * @return
+     */
+    @PostMapping("/department/update")
+    public String departmentUpdate(@RequestParam(value = "access_token") String access_token,
+                                   @RequestParam(value = "name", required = false) String name,
+                                   @RequestParam(value = "parentid", required = false) String parentid,
+                                   @RequestParam(value = "id") String id){
 
     }
+
+    /**
+     * 删除部门
+     * @return
+     */
+    @PostMapping("/department/delete")
+    public String departmentDelete(){
+
+    }
+
+    /**
+     * 新建部门
+     * @return
+     */
+    @PostMapping("/department/create")
+    public String departmentCreate(@RequestParam(value = "access_token") String access_token,
+                                   @RequestParam(value = "name") String name,
+                                   @RequestParam(value = "parentid") String parentid,
+                                   @RequestParam(value = "id", required = false) String id){
+
+    }
+
+
+    /**
+     * 更新员工
+     * @return
+     */
+    @PostMapping("/user/update")
+    public String userUpdate(){
+
+    }
+
+    /**
+     * 删除员工
+     * @return
+     */
+    @PostMapping("/user/delete")
+    public String userDelete(){
+
+    }
+
+    /**
+     * 新建员工
+     * @return
+     */
+    @PostMapping("/user/create")
+    public String userCreate(){
+
+    }
+
 }
