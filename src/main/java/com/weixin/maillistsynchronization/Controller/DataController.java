@@ -26,7 +26,6 @@ public class DataController {
 
     /**
      * 通讯录同步
-     *
      * @param access_token
      * @return
      */
@@ -34,18 +33,23 @@ public class DataController {
     public String Synchronization(@RequestParam(value = "access_token") String access_token) {
         String resultDepartment;
         String resultStaff;
+        Gson gson=new Gson();
         String departmentUrl = "https://qyapi.weixin.qq.com/cgi-bin/department/create?access_token=" + access_token;
-        String staffUrl="https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=" + access_token;
+        String staffUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=" + access_token;
         List<Department> DepartmentList = departmentService.getDepartmentTree();
-        List<Staff> staffList=staffService.getAllStaff();
-        resultDepartment=Tools.sendDate(DepartmentList,departmentUrl);
-        resultStaff=Tools.sendDate(staffList,staffUrl);
-        if(resultDepartment.equals("上传成功")&&resultStaff.equals("上传成功")){
+        List<Staff> staffList = staffService.getAllStaff();
+        if (!DepartmentList.isEmpty() && !staffList.isEmpty()) {
+            resultDepartment = Tools.sendDate(DepartmentList, departmentUrl);
+            resultStaff = Tools.sendDate(staffList, staffUrl);
+            if (resultDepartment.equals("0") && resultStaff.equals("0")) {
                 return "通讯录同步成功";
-        }else if(resultDepartment.equals("access_token已失效")||resultStaff.equals("access_token已失效")){
-            return "access_token已失效";
-        }else {
-            return "通讯录同步失败";
+            } else if (resultDepartment.equals("access_token已失效") || resultStaff.equals("access_token已失效")) {
+                return "access_token已失效";
+            } else {
+               return Tools.erroMessage(resultDepartment,resultStaff);
+            }
+        } else {
+            return "数据表错误";
         }
     }
 
@@ -58,55 +62,115 @@ public class DataController {
     public String get_access_token(@RequestParam(value = "corpid") String corpid,
                                    @RequestParam(value = "corpsecret") String corpsecret) {
         String url = "https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid=" + corpid + "&corpsecret=" + corpsecret;
-        JsonObject json = HttpClientUtils.sendPost(url,null);
-        if(json.get("errcode").equals("0")){
+        JsonObject json = HttpClientUtils.sendPost(url, null);
+        if (json.get("errcode").toString().equals("0")) {
             return json.get("access_token").toString();
-        }else {
+        } else {
             return json.toString();
         }
     }
 
     /**
      * 更新部门
+     *
      * @return
      */
     @PostMapping("/department/update")
     public String departmentUpdate(@RequestParam(value = "access_token") String access_token,
                                    @RequestParam(value = "name", required = false) String name,
                                    @RequestParam(value = "parentid", required = false) String parentid,
-                                   @RequestParam(value = "id") String id){
-
+                                   @RequestParam(value = "id") String id) {
+        String updateUrl = "https://qyapi.weixin.qq.com/cgi-bin/department/update?access_token=" + access_token;
+        Department department = new Department();
+        String result = new String();
+        department.setId(Integer.valueOf(id));
+        department.setName(name);
+        department.setParentid(Integer.valueOf(parentid));
+        if (departmentService.update(department) == 1) {
+            result = Tools.sendDate(department, updateUrl);
+        }
+        if (result.equals("0")) {
+            return "修改成功";
+        } else
+            return "修改失败";
     }
 
     /**
      * 删除部门
+     *
      * @return
      */
     @PostMapping("/department/delete")
-    public String departmentDelete(){
-
+    public String departmentDelete(@RequestParam(value = "access_token") String access_token,
+                                   @RequestParam(value = "id") String id) {
+        String deleteUrl = "https://qyapi.weixin.qq.com/cgi-bin/department/delete?access_token=" + access_token + "&id=" + id;
+        String result = new String();
+        if (departmentService.deleteById(Integer.valueOf(id)) == 1) {
+            result = Tools.sendDate(deleteUrl);
+        }
+        if (result.equals("0")) {
+            return "删除成功";
+        } else
+            return "删除失败";
     }
 
     /**
      * 新建部门
+     *
      * @return
      */
     @PostMapping("/department/create")
     public String departmentCreate(@RequestParam(value = "access_token") String access_token,
                                    @RequestParam(value = "name") String name,
                                    @RequestParam(value = "parentid") String parentid,
-                                   @RequestParam(value = "id", required = false) String id){
-
+                                   @RequestParam(value = "id", required = false) String id) {
+        String updateUrl = "https://qyapi.weixin.qq.com/cgi-bin/department/create?access_token=" + access_token;
+        Department department = new Department();
+        String result = new String();
+        department.setId(Integer.valueOf(id));
+        department.setName(name);
+        department.setParentid(Integer.valueOf(parentid));
+        if (departmentService.insert(department) == 1) {
+            result = Tools.sendDate(department, updateUrl);
+        }
+        if (result.equals("0")) {
+            return "新建成功";
+        } else
+            return "新建失败";
     }
 
 
     /**
      * 更新员工
+     *
      * @return
      */
     @PostMapping("/user/update")
-    public String userUpdate(){
-
+    public String userUpdate(@RequestParam(value = "access_token") String access_token,
+                             @RequestParam(value = "userid") String userid,
+                             @RequestParam(value = "name", required = false) String name,
+                             @RequestParam(value = "department", required = false) String department,
+                             @RequestParam(value = "mobile", required = false) String mobile,
+                             @RequestParam(value = "email", required = false) String email,
+                             @RequestParam(value = "gender", required = false) String gender,
+                             @RequestParam(value = "position", required = false) String position) {
+        String updateUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/update?access_token=" + access_token;
+        Staff staff = new Staff();
+        String result = new String();
+        staff.setUserid(userid);
+        staff.setName(name);
+        staff.setDepartment(Integer.valueOf(department));
+        staff.setMobile(mobile);
+        staff.setEmail(email);
+        staff.setGender(gender);
+        staff.setPosition(position);
+        if (staffService.update(staff) == 1) {
+            result = Tools.sendDate(staff, updateUrl);
+        }
+        if (result.equals("0")) {
+            return "修改成功";
+        } else
+            return "修改失败";
     }
 
     /**
@@ -114,8 +178,17 @@ public class DataController {
      * @return
      */
     @PostMapping("/user/delete")
-    public String userDelete(){
-
+    public String userDelete(@RequestParam(value = "access_token") String access_token,
+                             @RequestParam(value = "userid") String userid) {
+        String deleteUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/delete?access_token=" + access_token + "&userid=" + userid;
+        String result = new String();
+        if (staffService.deleteByUserId(userid) == 1) {
+            result = Tools.sendDate(deleteUrl);
+        }
+        if (result.equals("0")) {
+            return "删除成功";
+        } else
+            return "删除失败";
     }
 
     /**
@@ -123,7 +196,31 @@ public class DataController {
      * @return
      */
     @PostMapping("/user/create")
-    public String userCreate(){
+    public String userCreate(@RequestParam(value = "access_token") String access_token,
+                             @RequestParam(value = "userid") String userid,
+                             @RequestParam(value = "name") String name,
+                             @RequestParam(value = "department") String department,
+                             @RequestParam(value = "mobile") String mobile,
+                             @RequestParam(value = "email") String email,
+                             @RequestParam(value = "gender") String gender,
+                             @RequestParam(value = "position") String position) {
+        String createUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=" + access_token;
+        Staff staff = new Staff();
+        String result = new String();
+        staff.setUserid(userid);
+        staff.setName(name);
+        staff.setDepartment(Integer.valueOf(department));
+        staff.setMobile(mobile);
+        staff.setEmail(email);
+        staff.setGender(gender);
+        staff.setPosition(position);
+        if (staffService.insert(staff) == 1) {
+            result = Tools.sendDate(staff, createUrl);
+        }
+        if (result.equals("0")) {
+            return "新建成功";
+        } else
+            return "新建失败";
 
     }
 

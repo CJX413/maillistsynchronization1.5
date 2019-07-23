@@ -9,6 +9,7 @@ import com.weixin.maillistsynchronization.mapper.StaffDao;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -30,8 +31,8 @@ public class StaffServiceImp implements StaffService{
      * 查询所有员工
      */
     public List<Staff> queryAll(){
-
-        List<Staff> staffList=staffDao.queryAll();
+        List<Staff> staffList=new ArrayList<>();
+        staffList=staffDao.queryAll();
         return staffList;
 
     }
@@ -44,7 +45,8 @@ public class StaffServiceImp implements StaffService{
         if(Tools.checkStaffDate(staffList,departmentList)){
             return staffList;
         }else {
-            return null;
+            staffList.clear();
+            return staffList;
         }
     }
     /**

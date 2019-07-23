@@ -146,14 +146,55 @@ public interface StaffDao {
      * 根据userId更新员工信息
      */
     @Update({
-            "update staff",
-            "set name = #{name,jdbcType=VARCHAR},",
-            "department = #{department,jdbcType=INTEGER},",
-            "mobile = #{mobile,jdbcType=VARCHAR},",
-            "gender = #{gender,jdbcType=VARCHAR},",
-            "email = #{email,jdbcType=VARCHAR},",
-            "position = #{position,jdbcType=VARCHAR}",
-            "where userid = #{userid,jdbcType=VARCHAR}"
+            "<script>",
+            "update staff set",
+
+            "<if test='name!=null'>",
+            " name = #{name,jdbcType=VARCHAR},",
+            "</if>",
+
+            "<if test='name!=null and department!=null'>",
+            ",",
+            "</if>",
+
+            "<if test='department!=null'>",
+            " department = #{department,jdbcType=INTEGER},",
+            "</if>",
+
+            "<if test='department!=null and mobile!=null'>",
+            ",",
+            "</if>",
+
+            "<if test='mobile!=null'>",
+            " mobile = #{mobile,jdbcType=VARCHAR},",
+            "</if>",
+
+            "<if test='mobile!=null and gender!=null'>",
+            ",",
+            "</if>",
+
+            "<if test='gender!=null'>",
+            " gender = #{gender,jdbcType=VARCHAR},",
+            "</if>",
+
+            "<if test='gender!=null and email!=null'>",
+            ",",
+            "</if>",
+
+            "<if test='email!=null'>",
+            " email = #{email,jdbcType=VARCHAR},",
+            "</if>",
+
+            "<if test='email!=null and position!=null'>",
+            ",",
+            "</if>",
+
+            "<if test='position!=null'>",
+            " position = #{position,jdbcType=VARCHAR}",
+            "</if>",
+
+            " where userid = #{userid,jdbcType=VARCHAR}",
+            "</script>"
     })
     int update(Staff staff);
 

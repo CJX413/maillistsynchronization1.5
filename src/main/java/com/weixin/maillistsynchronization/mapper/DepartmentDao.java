@@ -24,6 +24,7 @@ public interface DepartmentDao {
             "values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, ",
             "#{parentid,jdbcType=INTEGER})"
     })
+    @Options(useGeneratedKeys = true, keyProperty = "id", keyColumn = "id")
     int insert(Department record);
 
     /**
@@ -110,10 +111,19 @@ public interface DepartmentDao {
      * 根据学生ID更新部门信息
      */
     @Update({
-            "update department",
-            "set name = #{name,jdbcType=VARCHAR},",
-            "parentid = #{parentid,jdbcType=INTEGER}",
-            "where id = #{id,jdbcType=INTEGER}"
+            "<script>",
+            "update department set",
+            "<if test='name!=null'>",
+            " name = #{name,jdbcType=VARCHAR}",
+            "</if>",
+            "<if test='name!=null and parentid!=null'>",
+            ",",
+            "</if>",
+            "<if test='parentid!=null'>",
+            " parentid = #{parentid,jdbcType=INTEGER}",
+            "</if>",
+            " where id = #{id,jdbcType=INTEGER}",
+            "</script>"
     })
     int update(Department record);
 
