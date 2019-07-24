@@ -9,7 +9,7 @@ public class FileUtils {
     /**
      * 创建CSV文件
      */
-    public static void createCSV(File csvFile, List<List<Object>> dataList) {
+    public static boolean createCSV(File csvFile, List<List<Object>> dataList) {
 
         BufferedWriter csvWtriter = null;
         //数据
@@ -25,11 +25,14 @@ public class FileUtils {
             csvWtriter.flush();
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         } finally {
             try {
                 csvWtriter.close();
+                return true;
             } catch (IOException e) {
                 e.printStackTrace();
+                return true;
             }
         }
     }

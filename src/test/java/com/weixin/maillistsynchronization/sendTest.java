@@ -38,7 +38,7 @@ public class sendTest {
     @Autowired
     private StaffService staffService;
     @Autowired
-    private DepartmentService service;
+    private DepartmentService departmentService;
 
     @Before
     public void init() {
@@ -50,7 +50,7 @@ public class sendTest {
         System.out.println("测试结束-----------------");
     }
 
-    @Test
+    //@Test
     public void send() {
         String access_token="QxAGHZY0XYRnZ798cXoKFn1K60WM-eU7VytMW6oxKvcz3LeR5tGD029MJuQ8pqy20oiVEC9HNRYYrNEa7MUeYMejyTxR4KNpyNpbjvDYyhec59ZDABdK1iW0ZAyN-W7LBT2a8ERpPu1e3E4nCw7TCIAGIV4XTb6HV15XV8QfKW-B1R1DRrVXDAvt6CTM2Pi92BK_6btZRER7GT3VBKiZNQ";
         String createUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=" + access_token;
@@ -69,42 +69,26 @@ public class sendTest {
 
     }
 
-    //@Test
+    @Test
     public void test1() {
-        List<Staff> list=staffService.getAllStaff();
-        List<List<Object>> date=new ArrayList<>();
-        List<Object> rowList;
-        String head="姓名,帐号,手机号,邮箱,所在部门,职位,性别,是否部门内领导,排序,别名,地址,座机,禁用,禁用项说明：(0-启用;1-禁用)";
-        rowList =new ArrayList<>();
-        rowList.add(head);
-        date.add(rowList);
-        for (int i = 1; i < list.size(); i++) {
-            rowList = new ArrayList<>();
-            rowList.add(list.get(i).getName()+",");
-            rowList.add(list.get(i).getUserid()+",");
-            rowList.add(list.get(i).getMobile()+",");
-            rowList.add(list.get(i).getEmail()+",");
-            rowList.add(list.get(i).getDepartment()+",");
-            rowList.add(list.get(i).getPosition()+",");
-            rowList.add(list.get(i).getGender()+",");
-            rowList.add(",");
-            rowList.add(",");
-            rowList.add(",");
-            rowList.add(",");
-            rowList.add(",");
-            rowList.add("0,");
-            date.add(rowList);
-        }
-        File file=new File("src/main/resources/static/CSV/batch_user_sample.csv");
-        File newfile=new File("src/main/resources/static/CSV/csv1.csv");
-        //FileUtils.copyFileByStream(file,newfile);
-        FileUtils.createCSV(newfile,date);
-        String access_token="5PFc5fsqTVjfXbl36kYXOiXIjzmMik-ijmE4_r2aVcL_6N2USBOpkzNUw4-4FxiLe8Q8XB2xOCCLMZJtDslMRMIgkxtGF3YteGXKOdrEk58mLuzp1Bcgapvc_Hw-9zQW_vrnBBzKuTMbDxn6N7mfYVQzwSWXyKrQvGh7R485z-z-qKXKcBJRWQPmrBLyp0psfTycV6t_MUS0z3XtDEFwBg";
-        String url="https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token="+access_token+"&type=file";
-        try {
-            System.out.println(HttpClientUtils.postFile(url,newfile));
-        } catch (IOException e) {
-            e.printStackTrace();
+        String access_token="BFIWN1MOA9uIAC8VoT7HgJJV3iI4fFt436lKon2Khhuae1eM4kJ9_J1CI0d-kFLlfw-4iIgpGXAah2J2sTUoIMbCjrwcCxctZoYWOSly6gjafw4xz8aqLFBtWW29q1X1cH0RQ5UTwu8lCU1b-oZeN7OeIX9wxoZ6H-BLgtxY6mXLiAAL_T0Z1l_7VMvKRhSH-bxg28S0mVebI4brqt82fA";
+        String path = "src/main/resources/static/CSV/";
+        String type = ".csv";
+        String sendfileUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + access_token + "&type=file";
+        String replacepartyUrl = "https://qyapi.weixin.qq.com/cgi-bin/batch/replaceparty?access_token=" + access_token;
+        String replaceuserUrl = "https://qyapi.weixin.qq.com/cgi-bin/batch/replaceuser?access_token=" + access_token;
+        List<Department> departmentList = departmentService.queryAll();
+        List<Staff> staffList = staffService.queryAll();
+        List<List<Object>> departmentTable = Tools.toDepartmentCsv(departmentList);
+        List<List<Object>> staffTable = Tools.toStaffCsv(staffList);
+        String departmentname = path + Tools.getRandomString(15) + type;
+        String staffname = path + Tools.getRandomString(15) + type;
+        File departmentfile = new File(departmentname);
+        File stafffile = new File(staffname);
+        if (FileUtils.createCSV(departmentfile, departmentTable) && FileUtils.createCSV(stafffile, staffTable)) {
+            if (Tools.fileSynchronization(sendfileUrl, replacepartyUrl, departmentfile) && Tools.fileSynchronization(sendfileUrl, replaceuserUrl, stafffile)) {
+                System.out.println("同步成功");
+            }
         }
     }
 }

@@ -2,12 +2,12 @@ package com.weixin.maillistsynchronization.Controller;
 
 
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.weixin.maillistsynchronization.Model.Department;
 import com.weixin.maillistsynchronization.Model.Staff;
 import com.weixin.maillistsynchronization.Service.DepartmentService;
 import com.weixin.maillistsynchronization.Service.StaffService;
+import com.weixin.maillistsynchronization.Utils.FileUtils;
 import com.weixin.maillistsynchronization.Utils.HttpClientUtils;
 import com.weixin.maillistsynchronization.Utils.Tools;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.File;
 import java.util.List;
 
 @RestController
@@ -26,6 +27,7 @@ public class DataController {
 
     /**
      * 通讯录同步
+     *
      * @param access_token
      * @return
      */
@@ -33,7 +35,7 @@ public class DataController {
     public String Synchronization(@RequestParam(value = "access_token") String access_token) {
         String resultDepartment;
         String resultStaff;
-        Gson gson=new Gson();
+        Gson gson = new Gson();
         String departmentUrl = "https://qyapi.weixin.qq.com/cgi-bin/department/create?access_token=" + access_token;
         String staffUrl = "https://qyapi.weixin.qq.com/cgi-bin/user/create?access_token=" + access_token;
         List<Department> DepartmentList = departmentService.getDepartmentTree();
@@ -46,11 +48,39 @@ public class DataController {
             } else if (resultDepartment.equals("access_token已失效") || resultStaff.equals("access_token已失效")) {
                 return "access_token已失效";
             } else {
-               return Tools.erroMessage(resultDepartment,resultStaff);
+                return Tools.erroMessage(resultDepartment, resultStaff);
             }
         } else {
             return "数据表错误";
         }
+    }
+
+    /**
+     * 另一种通讯录同步
+     */
+    @PostMapping("/synchronization1")
+    public String Synchronization1(@RequestParam(value = "access_token") String access_token) {
+        String path = "src/main/resources/static/CSV/";
+        String type = ".csv";
+        String sendfileUrl = "https://qyapi.weixin.qq.com/cgi-bin/media/upload?access_token=" + access_token + "&type=file";
+        String replacepartyUrl = "https://qyapi.weixin.qq.com/cgi-bin/batch/replaceparty?access_token=" + access_token;
+        String replaceuserUrl = "https://qyapi.weixin.qq.com/cgi-bin/batch/replaceuser?access_token=" + access_token;
+        List<Department> departmentList = departmentService.queryAll();
+        List<Staff> staffList = staffService.queryAll();
+        List<List<Object>> departmentTable = Tools.toDepartmentCsv(departmentList);
+        List<List<Object>> staffTable = Tools.toStaffCsv(staffList);
+        String departmentname = path + Tools.getRandomString(15) + type;
+        String staffname = path + Tools.getRandomString(15) + type;
+        File departmentfile = new File(departmentname);
+        File stafffile = new File(staffname);
+        if (FileUtils.createCSV(departmentfile, departmentTable) && FileUtils.createCSV(stafffile, staffTable)) {
+            if (Tools.fileSynchronization(sendfileUrl, replacepartyUrl, departmentfile) && Tools.fileSynchronization(sendfileUrl, replaceuserUrl, stafffile)) {
+                departmentfile.delete();
+                stafffile.delete();
+                return "通讯录同步成功";
+            }
+        }
+        return "同步失败";
     }
 
     /**
@@ -175,6 +205,7 @@ public class DataController {
 
     /**
      * 删除员工
+     *
      * @return
      */
     @PostMapping("/user/delete")
@@ -193,6 +224,7 @@ public class DataController {
 
     /**
      * 新建员工
+     *
      * @return
      */
     @PostMapping("/user/create")
